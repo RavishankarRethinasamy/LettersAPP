@@ -1,7 +1,7 @@
 import uuid
 import logging
 from datetime import datetime
-from utils.db import insert_document, update_documents, find_documents, find_document
+from utils.db import insert_document, update_document, update_documents, find_documents, find_document
 from common.definitions import Collections
 from common.definitions import HttpCodes
 
@@ -46,7 +46,8 @@ class Blogs(object):
                     "display_name": data.get("display_name"),
                     "description": data.get("description"),
                     "updates": {
-                        "likes": data.get("updates", {}).get("likes", 0)
+                        "likes": data.get("updates", {}).get("likes", 0),
+                        "dislikes": data.get("updates", {}).get("dislikes", 0)
                     }
                 })
             response = {
@@ -83,9 +84,36 @@ class Blogs(object):
             logging.error(str(e))
             raise Exception(str(e))
 
-    def update(self, req_body, args):
+    def update(self, req_body):
         try:
-            pass
+            blog_id = req_body.get("blog_id")
+            type = req_body.get("type")
+            if not blog_id:
+                raise Exception("blog Id is mandatory to update details")
+            query = {
+                "is_deleted": False,
+                "blog_id": blog_id
+            }
+            if type == "like":
+                update_document(Collections.BLOGS, query, {
+                    "$inc": {
+                        "updates.likes": 1
+                    }
+                })
+            if type == "dislike":
+                update_document(Collections.BLOGS, query, {
+                    "$inc": {
+                        "updates.dislikes": 1
+                    }
+                })
+            if type == "comment":
+                comment = req_body.get("comment", "")
+                update_document(Collections.BLOGS, query, {
+                    "$push": {
+                        "updates.comments": comment
+                    }
+                })
+            return {}
         except Exception as e:
             logging.error(str(e))
             raise Exception(str(e))
