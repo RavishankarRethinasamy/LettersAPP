@@ -33,7 +33,7 @@ class Blogs(object):
                 "is_deleted": False
             }
             data = find_documents(Collections.BLOGS, query)
-            count = data.count()
+            count = len(data)
             page = args.get("page", 1)
             limit = args.get("limit", 15)
             paginated_data = find_documents(

@@ -51,7 +51,7 @@ def find_documents(collection_name, query=None, sort_fields=[], descending=False
         documents = documents.sort(sort_query)
     if limit:
         documents = documents.skip(skip_val).limit(limit)
-    return documents
+    return list(documents)
 
 def aggregate_collection(collection_name, query):
     conn = connect(collection_name)
