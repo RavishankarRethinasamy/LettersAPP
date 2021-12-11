@@ -1,7 +1,7 @@
 import uuid
 import logging
 from datetime import datetime
-from utils.db import insert_document, update_document, update_documents, find_documents, find_document
+from utils.db import insert_document, update_documents, find_documents, find_document
 from common.definitions import Collections
 from common.definitions import HttpCodes
 
@@ -33,7 +33,7 @@ class Blogs(object):
                 "is_deleted": False
             }
             data = find_documents(Collections.BLOGS, query)
-            count = len(data)
+            count = data.count()
             page = args.get("page", 1)
             limit = args.get("limit", 15)
             paginated_data = find_documents(
@@ -73,11 +73,26 @@ class Blogs(object):
             blog_data = find_document(Collections.BLOGS, query)
             if not blog_data:
                 raise Exception("Unable to find the blog details")
+            latest_blogs = find_documents(Collections.BLOGS, {}, sort_fields=["created_at"], descending=True, limit=3)
+            popular_blogs  = find_documents(Collections.BLOGS, {}, sort_fields=["updated.likes"], descending=True, limit=3)
+            latest_content, popular_content = [], []
+            for lb in latest_blogs:
+                latest_content.append({
+                    "display_name": lb["display_name"],
+                    "blog_id": lb["blog_id"]
+                })
+            for pb in popular_blogs:
+                popular_content.append({
+                    "display_name": lb["display_name"],
+                    "blog_id": lb["blog_id"]
+                })
             updates = blog_data["updates"]
             updates["comments_count"] = len(updates.get("comments", []))
             response = {
                 "data": blog_data["content"],
-                "updated": updates
+                "updated": updates,
+                "latest_contents": latest_content,
+                "popular_contents": popular_content
             }
             return response
         except Exception as e:
@@ -95,20 +110,20 @@ class Blogs(object):
                 "blog_id": blog_id
             }
             if type == "like":
-                update_document(Collections.BLOGS, query, {
+                update_documents(Collections.BLOGS, query, {
                     "$inc": {
                         "updates.likes": 1
                     }
                 })
             if type == "dislike":
-                update_document(Collections.BLOGS, query, {
+                update_documents(Collections.BLOGS, query, {
                     "$inc": {
                         "updates.dislikes": 1
                     }
                 })
             if type == "comment":
                 comment = req_body.get("comment", "")
-                update_document(Collections.BLOGS, query, {
+                update_documents(Collections.BLOGS, query, {
                     "$push": {
                         "updates.comments": comment
                     }
