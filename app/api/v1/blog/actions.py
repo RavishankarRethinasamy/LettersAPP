@@ -92,6 +92,11 @@ class Blogs(object):
                 "is_deleted": False,
                 "blog_id": blog_id
             }
+            update_documents(Collections.BLOGS, query, {
+                    "$inc": {
+                        "updates.views": 1
+                    }
+                })
             blog_data = find_document(Collections.BLOGS, query)
             if not blog_data:
                 raise Exception("Unable to find the blog details")
