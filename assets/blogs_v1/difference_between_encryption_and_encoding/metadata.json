@@ -1,0 +1,11 @@
+{
+  "name": "difference_between_encryption_and_encoding",
+  "display_name": "Difference between Encryption and Encoding in Simple terms ?",
+  "description": "Non technical people normally confused with Encoding and Encryption . Wait! So technincal people don't get confused at all ?. Not at all.. there are lots of other things to get confused.\nlet's focus on the topic. Learn more..",
+  "content": [
+    {
+      "value": "ENCODING:\n\nEncoding is a process of converting one form into another form. Which is easily reversible.\n\nLet's assume you are reading a book for your grandma. The book has the contents in text format. when u read ,You are\nconverting it as sound so grandma can understand what you are reading. The use of encoding is to convert data so that\nit can be consumed by a different type of system.\n\nin technichal we do lot of encoding.Ex: ASCII , Base64 ..\nEncoding does not protect or secure data because it is easy to reverse.\n\n\nENCRYPTION:\n\nEncryption is process of changing data to conceal the content so that unauthorized person cannot understand.\nTechnically, it is the process of converting readable plaintext to incomprehensible text.\n\nencryption involves cryptographic alogorithm and encryption key , so any one who knows the alogorithm and key can\ndecrypt the data and understand. The actual purpose of encryption is data security and integrity.\n\n\nEncryption and Encoding both are used in Software data security.\n\nIn conputers Encryption always deals with the Binary (0s and 1s) . So when we want to Encrypt a text ,\nwe may need to Encode it into bytes(Binary) , then we do the encryption on the bytes So we get the encrypted bytes ,\nthen we do encode the encrypted bytes so that it can be shared through any medium.\n",
+      "style": "p"
+    }
+  ]
+}

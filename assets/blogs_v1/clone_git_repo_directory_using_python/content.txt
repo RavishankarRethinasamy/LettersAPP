@@ -1,0 +1,26 @@
+To clone a git repo using python, consider using package GitPython.
+
+To install the package, run
+
+pip install GitPython
+
+It will install the latest version of the package. Refer the pypi org for complete documentation
+
+import os
+from git import Repo
+
+path_to_pull = "/home/user/tmp"
+repo = Repo.init(path_to_pull)
+
+sparse_path = os.path.join(path_to_pull, '.git/info/sparse-checkout')
+repo.config_writer().set_value("core", "sparseCheckout", "true").release()
+
+with open(sparse_path, "w") as sf:
+    sf.write(<git_directory_path_to_clone> + "/*")
+
+repo.create_remote('origin', arl=<remote url>)
+repo.remote().fetch()
+repo.git.pull()
+
+we manually updating the git directory path in sparse-checkout and make the git pull command pulling
+that particular repo.

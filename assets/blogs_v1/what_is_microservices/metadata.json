@@ -1,0 +1,11 @@
+{
+  "name": "what_is_microservices",
+  "display_name": "What is Micro Services ?",
+  "description": "Breaking the single large web service architecture to different small web services..Learn more..",
+  "content": [
+    {
+      "value": "Instead of creating a product as a single App, developing multiple loosly coupled services and put together\nto create a full functioning product.\n\nConsider creating a School administrative systems,\n\nfollowing monolythic architecure, we can create a single Application in any programming langurage. we include all\nfeatures like dashboard, user management, data management, reports, blogs and video sharing, chat and call service,\npayment service etc...all sharing a single database.\n\nAnd what if I add a feature in user management, it is mandatory to restart the entire server to make it applicable\nthat is costly in terms of functionality. This one of other major issue in monolythic architecture.\n\nTo overcome this,\n\nLets split those into mulitple loosly coupled services.\n\nUser Management System\nData Management System\nReports Manager\nContent Sharing Manager\nCommunication Manager\nPayment Service\nNotification Service\n\nI named above just for this blog. Imagine the names and amount of services will be for an pro product. All the services\nhave its own database. APIs will be exposed in all services so that UI can communicate with any service. Suppose, the\nNotification Service requires data from Data Management System, it can call the internal APIs to process data.\n\nWe can add encryption to make this more securable.\n\n",
+      "style": "p"
+    }
+  ]
+}

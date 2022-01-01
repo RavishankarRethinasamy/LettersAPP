@@ -1,0 +1,11 @@
+{
+  "name": "clone_git_repo_directory_using_python",
+  "display_name": "Clone Git repo directory using python",
+  "description": "To clone a git repo using python, consider using package GitPython ..Learn more..",
+  "content": [
+    {
+      "value": "To clone a git repo using python, consider using package GitPython.\n\nTo install the package, run\n\npip install GitPython\n\nIt will install the latest version of the package. Refer the pypi org for complete documentation\n\nimport os\nfrom git import Repo\n\npath_to_pull = \"/home/user/tmp\"\nrepo = Repo.init(path_to_pull)\n\nsparse_path = os.path.join(path_to_pull, '.git/info/sparse-checkout')\nrepo.config_writer().set_value(\"core\", \"sparseCheckout\", \"true\").release()\n\nwith open(sparse_path, \"w\") as sf:\n    sf.write(<git_directory_path_to_clone> + \"/*\")\n\nrepo.create_remote('origin', arl=<remote url>)\nrepo.remote().fetch()\nrepo.git.pull()\n\nwe manually updating the git directory path in sparse-checkout and make the git pull command pulling\nthat particular repo.",
+      "style": "p"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+Instead of creating a product as a single App, developing multiple loosly coupled services and put together
+to create a full functioning product.
+
+Consider creating a School administrative systems,
+
+following monolythic architecure, we can create a single Application in any programming langurage. we include all
+features like dashboard, user management, data management, reports, blogs and video sharing, chat and call service,
+payment service etc...all sharing a single database.
+
+And what if I add a feature in user management, it is mandatory to restart the entire server to make it applicable
+that is costly in terms of functionality. This one of other major issue in monolythic architecture.
+
+To overcome this,
+
+Lets split those into mulitple loosly coupled services.
+
+User Management System
+Data Management System
+Reports Manager
+Content Sharing Manager
+Communication Manager
+Payment Service
+Notification Service
+
+I named above just for this blog. Imagine the names and amount of services will be for an pro product. All the services
+have its own database. APIs will be exposed in all services so that UI can communicate with any service. Suppose, the
+Notification Service requires data from Data Management System, it can call the internal APIs to process data.
+
+We can add encryption to make this more securable.
+

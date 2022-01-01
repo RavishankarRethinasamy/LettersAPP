@@ -1,0 +1,11 @@
+{
+  "name": "base64_encoding",
+  "display_name": "What is Base 64 Encoding ?",
+  "description": "Base64 is a data encoding scheme. Base64 encoding converts group of bytes into a sequence of readable ASCII characters. Learn more..",
+  "content": [
+    {
+      "value": "Base64 Encoding:\n\nBase64 is a data encoding scheme. Base64 encoding converts group of bytes into a sequence of readable ASCII characters.\n\nBase64 breaks the bytes(8 bits) into groups of 6 bits. Each 6 bits group is mapped to a character. This character is\none of the 64 characters in the Base64 character table. These characters include a-z, A-Z, 0-9, +, / and a special\npurpose character =(The 65th character).\n\n0\t000000\tA\n1\t000001\tB\n2\t000010\tC\n3\t000011\tD\n4\t000100\tE\n5\t000101\tF\n6\t000110\tG\n7\t000111\tH\n8\t001000\tI\n9\t001001\tJ\n10\t001010\tK\n11\t001011\tL\n12\t001100\tM\n13\t001101\tN\n14\t001110\tO\n15\t001111\tP\n16\t010000\tQ\n17\t010001\tR\n18\t010010\tS\n19\t010011\tT\n20\t010100\tU\n21\t010101\tV\n22\t010110\tW\n23\t010111\tX\n24\t011000\tY\n25\t011001\tZ\n26\t011010\ta\n27\t011011\tb\n28\t011100\tc\n29\t011101\td\n30\t011110\te\n31\t011111\tf\n32\t100000\tg\n33\t100001\th\n34\t100010\ti\n35\t100011\tj\n36\t100100\tk\n37\t100101\tl\n38\t100110\tm\n39\t100111\tn\n40\t101000\to\n41\t101001\tp\n42\t101010\tq\n43\t101011\tr\n44\t101100\ts\n45\t101101\tt\n46\t101110\tu\n47\t101111\tv\n48\t110000\tw\n49\t110001\tx\n50\t110010\ty\n51\t110011\tz\n52\t110100\t0\n53\t110101\t1\n54\t110110\t2\n55\t110111\t3\n56\t111000\t4\n57\t111001\t5\n58\t111010\t6\n59\t111011\t7\n60\t111100\t8\n61\t111101\t9\n62\t111110\t+\n63\t111111\t/\nPadding =\n\n\nBase64 takes byte sequence and divide them to groups of 6 bits. Sometimes it's impossible to divide the sequence into\nexact number of groups of 6 bits. In this case, 0 will be padded into the sequence so that it will be exact number of\ngroups of 24 bits(least common multiple of 6 and 8). This process is called padding.\n\nWhen encoding the padded data, if there are 6 bits group fully padded(each bit in the group is padded without containing\nany bit from the original data), it will be mapped to \"=\"",
+      "style": "p"
+    }
+  ]
+}

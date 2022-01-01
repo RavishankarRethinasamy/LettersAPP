@@ -15,14 +15,25 @@ class Blogs(object):
                 "blog_id": str(uuid.uuid4()),
                 "name": req_body["name"],
                 "display_name": req_body["display_name"],
+                "description": req_body["description"],
                 "content": req_body["content"],
                 "created_by": "admin",
                 "created_at": datetime.utcnow(),
                 "updated_by": "admin",
                 "updated_at": datetime.utcnow(),
-                "is_deleted": False
+                "is_deleted": False,
+                "updates": {
+                    "likes": 0,
+                    "dislikes": 0,
+                    "comments": [],
+                    "views": 0
+                }
             }
-            insert_document(Collections.BLOGS, blog_dict)
+            update_documents(Collections.BLOGS, {
+                "name": blog_dict["name"]
+            }, {
+                "$set": blog_dict
+            }, upsert=True)
             return dict(status=HttpCodes.SUCCESS, message="Blog created successfully")
         except Exception as e:
             logging.error(str(e))
@@ -36,7 +47,7 @@ class Blogs(object):
             data = find_documents(Collections.BLOGS, query)
             count = len(data)
             page = int(args.get("page", 1))
-            limit = int(args.get("limit", 5))
+            limit = int(args.get("limit", 10))
             skip_val = 0
             page_count = 1
             skip_val, limit, page_count = pagination(limit, page, count, page_count, skip_val)  

@@ -1,0 +1,11 @@
+{
+  "name": "clone_git_repo_using_python",
+  "display_name": "Cloning GIT repo using Python ..",
+  "description": "To clone a git repo using python, consider using package GitPython ..Learn more..",
+  "content": [
+    {
+      "value": "To clone a git repo using python, consider using package GitPython.\n\nTo install the package, run\n\npip install GitPython\n\nIt will install the latest version of the package. Refer the pypi org for complete documentation\n\nfrom git import Repo\npath_to_pull = \"/home/user/tmp\"\nrepo = Repo.init(path_to_pull)\nrepo.create_remote('origin', arl=<remote url>)\nrepo.remote().fetch()\nrepo.git.pull()\n\nSimply, we are initialize the directory, create remote using remote url, fetching the commits and ref and pull it.\nOne way of cloning the git repository",
+      "style": "p"
+    }
+  ]
+}

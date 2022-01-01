@@ -12,7 +12,7 @@ if os.path.exists(os.path.join(possible_topdir, 'app', '__init__.py')):
 from app.api.v1.blog.actions import Blogs
 from common import config
 
-resource_path = "/opt/core/Letters/resources/test"
+resource_path = "/opt/core/LettersAPP/assets/blogs_v1"
 
 
 def load_resource(content_path):
