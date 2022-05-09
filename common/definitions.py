@@ -1,8 +1,7 @@
-
-
 class Collections(object):
     BLOGS = "blogs"
-    BLOGS_REVIEW = "blogs_review"
+    UPDATES = "updates"
+    CATEGORY = "category"
 
 
 class HttpCodes(object):

@@ -1,14 +1,15 @@
-from oslo_config import cfg
 from pymongo import MongoClient, cursor
 from bson import ObjectId
 from pymongo import ASCENDING
 from pymongo import DESCENDING
 
+from common.config import args
+
 
 def connect(collection_name):
-    connection_string = f"mongodb://{cfg.CONF.mongo_host}:{cfg.CONF.mongo_port}/"
+    connection_string = f"mongodb://{args.get('MAIN.mongo_host')}:{args.get('MAIN.mongo_port')}/"
     client = MongoClient(connection_string)
-    db_conn = client[cfg.CONF.database_name]
+    db_conn = client["letters"]
     coll_conn = db_conn[collection_name]
     return coll_conn
 
