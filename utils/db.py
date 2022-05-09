@@ -7,7 +7,11 @@ from common.config import args
 
 
 def connect(collection_name):
-    connection_string = f"mongodb://{args.get('MAIN.mongo_host')}:{args.get('MAIN.mongo_port')}/"
+    if args.get("MAIN.mongo_username"):
+        connection_string = f"mongodb://{args.get('MAIN.username')}:{args.get('MAIN.password')}@" \
+                            f"{args.get('MAIN.mongo_host')}:{args.get('MAIN.mongo_port')}/"
+    else:
+        connection_string = f"mongodb://{args.get('MAIN.mongo_host')}:{args.get('MAIN.mongo_port')}/"
     client = MongoClient(connection_string)
     db_conn = client["letters"]
     coll_conn = db_conn[collection_name]
