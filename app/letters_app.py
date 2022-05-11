@@ -1,3 +1,6 @@
+import logging
+import traceback
+
 from flask import Flask, request
 from flask_restful import Api
 from flask_cors import CORS
@@ -20,6 +23,7 @@ def list_blogs():
     try:
         return Blogs().list(request.args, kwargs={})
     except Exception as e:
+        logging.error(traceback.format_exc())
         raise Exception(e)
 
 

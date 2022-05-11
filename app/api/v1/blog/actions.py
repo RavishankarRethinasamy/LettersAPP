@@ -1,10 +1,10 @@
 import time
 import uuid
 import logging
+import traceback
 from datetime import datetime
-from utils.db import insert_document, update_documents, find_documents, aggregate_collection
+from utils.db import insert_document, update_documents, find_documents, aggregate_collection, remove_documents
 from common.definitions import Collections
-from common.utils import pagination
 
 
 class Blogs(object):
@@ -35,8 +35,11 @@ class Blogs(object):
                 message="letter created successfully",
                 blog_id=blog_dict["blog_id"])
         except Exception as e:
-            logging.error(str(e))
-            raise Exception(str(e))
+            logging.error(traceback.format_exc())
+            return {
+                "status": "error",
+                "message": str(e)
+            }
 
     def list(self, args, kwargs):
         try:
@@ -64,7 +67,11 @@ class Blogs(object):
                         "name": "$name",
                         "display_name": "$display_name",
                         "created_by": "$created_by",
-                        "created_at": "$created_at",
+                        "created_at": {"$dateToString": {
+                            "date": "$created_at",
+                            "format": "%Y-%m-%d %H:%M:%S GMT",
+                            "timezone": "GMT",
+                        }},
                         "type": "$type",
                         "category": "$category",
                         "pays": "$updates.pays",
@@ -102,8 +109,11 @@ class Blogs(object):
                 "data": data
             }
         except Exception as e:
-            logging.error(str(e))
-            raise Exception(str(e))
+            logging.error(traceback.format_exc())
+            return {
+                "status": "error",
+                "message": str(e)
+            }
 
     def read(self, args):
         try:
@@ -132,7 +142,11 @@ class Blogs(object):
                         "display_name": "$display_name",
                         "data": "$content",
                         "created_by": "$created_by",
-                        "created_at": "$created_at",
+                        "created_at": {"$dateToString": {
+                            "date": "$created_at",
+                            "format": "%Y-%m-%d %H:%M:%S GMT",
+                            "timezone": "GMT",
+                        }},
                         "type": "$type",
                         "category": "$category",
                         "updates": "$updates",
@@ -161,8 +175,8 @@ class Blogs(object):
             data["updates"].pop("_id", "")
             return data
         except Exception as e:
-            logging.error(str(e))
-            raise Exception(str(e))
+            logging.error(traceback.format_exc())
+            raise Exception(e)
 
     def update(self, req_body, kwargs):
         try:
@@ -195,24 +209,39 @@ class Blogs(object):
                 "message": "letter updated successfully"
             }
         except Exception as e:
-            logging.error(str(e))
-            raise Exception(str(e))
+            logging.error(traceback.format_exc())
+            return {
+                "status": "error",
+                "message": str(e)
+            }
 
     def delete(self, req_body, kwargs):
         try:
-            blog_id = req_body.get("blog_id")
-            if not blog_id:
-                raise Exception("blog Id is mandatory to update details")
-            update_documents(Collections.BLOGS, {
-                "blog_id": blog_id
-            }, {
-                                 "$set": {
-                                     "is_deleted": True,
-                                     "deleted_by": kwargs["user_name"]
-                                 }
-                             })
+            delete_query = {
+                "created_by": kwargs["user_name"]
+            }
+            if req_body and "blog_id" in req_body:
+                delete_query["blog_id"] = req_body["blog_id"]
+            records_to_delete = find_documents(Collections.BLOGS, delete_query)
+            deletable_blog_ids = [b_id["blog_id"] for b_id in records_to_delete]
+            remove_documents(Collections.UPDATES, {
+                "blog_id": {
+                    "$in": deletable_blog_ids
+                }
+            })
+            remove_documents(Collections.BLOGS, {
+                "blog_id": {
+                    "$in": deletable_blog_ids
+                }
+            })
             return {
+                "status": "success",
                 "message": "letter deleted successfully"
             }
         except Exception as e:
-            raise Exception(e)
+            logging.error(traceback.format_exc())
+            return {
+                "status": "error",
+                "message": str(e)
+            }
+

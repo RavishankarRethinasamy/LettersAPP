@@ -1,4 +1,6 @@
 import jwt
+import logging
+import traceback
 
 from flask import request
 from functools import wraps
@@ -10,12 +12,14 @@ def authorize(f):
     def handler(obj, **kwargs):
         token = request.headers.get("lAuthToken")
         if not token:
-            return {'message': 'Token is missing'}
+            raise Exception("Auth Token missing in the request")
         try:
             kwargs.update(jwt.decode(token, args.get("MAIN.secret_key")))
         except Exception as e:
-            return {'message': 'User not authorized.'}, 403
-
+            logging.error(traceback.format_exc())
+            return {
+                "status": "error",
+                "message": str(e)
+            }
         return f(obj, **kwargs)
-
     return handler

@@ -3,7 +3,6 @@ from flask import request
 from flask_restful import Resource
 
 from utils.auth import authorize
-from common.utils import parse_req
 
 
 class BlogsRoute(Resource):
@@ -35,8 +34,7 @@ class BlogsRoute(Resource):
 
     @authorize
     def delete(self, action_name=None, **kwargs):
-        req_body = parse_req(request.get_data())
         response = {}
         if action_name == "delete":
-            response = self.actions.delete(req_body, kwargs)
+            response = self.actions.delete(request.get_json(), kwargs)
         return response
