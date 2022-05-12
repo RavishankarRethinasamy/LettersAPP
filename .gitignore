@@ -4,6 +4,7 @@ build/
 dist/
 develop-eggs/
 dist/
+.idea/
 eggs/
 lib/
 lib64/

@@ -8,7 +8,7 @@ from common.config import args
 
 def connect(collection_name):
     if args.get("MAIN.mongo_username"):
-        connection_string = f"mongodb://{args.get('MAIN.username')}:{args.get('MAIN.password')}@" \
+        connection_string = f"mongodb://{args.get('MAIN.mongo_username')}:{args.get('MAIN.mongo_password')}@" \
                             f"{args.get('MAIN.mongo_host')}:{args.get('MAIN.mongo_port')}/"
     else:
         connection_string = f"mongodb://{args.get('MAIN.mongo_host')}:{args.get('MAIN.mongo_port')}/"
