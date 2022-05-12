@@ -11,9 +11,9 @@ def authorize(f):
     @wraps(f)
     def handler(obj, **kwargs):
         token = request.headers.get("lAuthToken")
-        if not token:
-            raise Exception("Auth Token missing in the request")
         try:
+            if not token or token == 'null':
+                raise Exception("Auth Token missing in the request")
             kwargs.update(jwt.decode(token, args.get("MAIN.secret_key")))
         except Exception as e:
             logging.error(traceback.format_exc())

@@ -1,3 +1,4 @@
+from urllib.parse import quote_plus
 from pymongo import MongoClient, cursor
 from bson import ObjectId
 from pymongo import ASCENDING
@@ -8,7 +9,8 @@ from common.config import args
 
 def connect(collection_name):
     if args.get("MAIN.mongo_username"):
-        connection_string = f"mongodb://{args.get('MAIN.mongo_username')}:{args.get('MAIN.mongo_password')}@" \
+        password = quote_plus(args.get('MAIN.mongo_password'))
+        connection_string = f"mongodb://{args.get('MAIN.mongo_username')}:{password}@" \
                             f"{args.get('MAIN.mongo_host')}:{args.get('MAIN.mongo_port')}/"
     else:
         connection_string = f"mongodb://{args.get('MAIN.mongo_host')}:{args.get('MAIN.mongo_port')}/"
