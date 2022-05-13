@@ -5,9 +5,21 @@ import traceback
 from datetime import datetime
 from utils.db import insert_document, update_documents, find_documents, aggregate_collection, remove_documents
 from common.definitions import Collections
+from common.utils import pagination
 
 
 class Blogs(object):
+
+    def create_description(self, contents):
+        desc = ""
+        for content in contents:
+            if isinstance(content["insert"], str):
+                if content["insert"] == "\n":
+                    continue
+                desc += content["insert"].replace("\n", " ")
+                if len(desc) > 25:
+                    break
+        return desc
 
     def create(self, req_body, kwargs):
         try:
@@ -15,7 +27,8 @@ class Blogs(object):
                 "blog_id": str(uuid.uuid4()),
                 "name": req_body["name"],
                 "display_name": req_body["name"],
-                "content": req_body.get("content", []),
+                "description": self.create_description(req_body["content"]),
+                "content": req_body["content"],
                 "created_by": kwargs.get("user_name", "guest"),
                 "created_at": datetime.utcnow(),
                 "is_deleted": False,
@@ -29,11 +42,11 @@ class Blogs(object):
                 "pays": 0,
                 "comments": []
             })
-            time.sleep(1)
             return dict(
                 status="success",
                 message="letter created successfully",
-                blog_id=blog_dict["blog_id"])
+                blog_id=blog_dict["blog_id"],
+                blog_name=blog_dict["name"])
         except Exception as e:
             logging.error(traceback.format_exc())
             return {
@@ -66,6 +79,7 @@ class Blogs(object):
                         "blog_id": "$blog_id",
                         "name": "$name",
                         "display_name": "$display_name",
+                        "description": "$description",
                         "created_by": "$created_by",
                         "created_at": {"$dateToString": {
                             "date": "$created_at",
@@ -96,17 +110,19 @@ class Blogs(object):
                     )
                 aggregate_query[0]["$match"].update(search_query)
             data = aggregate_collection(Collections.BLOGS, aggregate_query)
-            # count = len(data)
-            # page = int(args.get("page", 1))
-            # limit = int(args.get("limit", 3))
-            # skip_val = 0
-            # page_count = 1
-            # skip_val, limit, page_count = pagination(limit, page, count, page_count, skip_val)
-            # data = data[skip_val:]
-            # data = data[:limit]
+            count = len(data)
+            page = int(args.get("page", 1))
+            limit = int(args.get("limit", 10))
+            skip_val = 0
+            page_count = 1
+            skip_val, limit, page_count = pagination(limit, page, count, page_count, skip_val)
+            data = data[skip_val:]
+            data = data[:limit]
             return {
                 "status": "success",
-                "data": data
+                "data": data,
+                "total": count,
+                "page": page_count
             }
         except Exception as e:
             logging.error(traceback.format_exc())
@@ -244,4 +260,3 @@ class Blogs(object):
                 "status": "error",
                 "message": str(e)
             }
-
