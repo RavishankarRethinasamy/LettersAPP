@@ -78,3 +78,8 @@ def get_distinct_fields(collection_name, field_name, query=None):
 def remove_documents(collection_name, query):
     conn = connect(collection_name)
     conn.remove(query)
+
+
+def get_count(collection_name):
+    conn = connect(collection_name)
+    return conn.count()

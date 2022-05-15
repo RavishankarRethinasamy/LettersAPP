@@ -1,9 +1,10 @@
-import time
 import uuid
 import logging
 import traceback
 from datetime import datetime
-from utils.db import insert_document, update_documents, find_documents, aggregate_collection, remove_documents
+from string import punctuation
+from utils.db import insert_document, update_documents, find_documents, \
+    aggregate_collection, remove_documents, get_count
 from common.definitions import Collections
 from common.utils import pagination
 
@@ -17,14 +18,21 @@ class Blogs(object):
                 if content["insert"] == "\n":
                     continue
                 desc += content["insert"].replace("\n", " ")
-                if len(desc) > 25:
+                if len(desc) > 302:
                     break
-        return desc
+        return f'{desc}...' if len(desc) < 302 else f'{desc[0:301]}...'
+
+    def generate_blog_id(self, name):
+        for sc in punctuation:
+            if sc in name:
+                name = name.replace(sc, '-')
+        id_string = name.replace(" ", "-")
+        return f'{id_string}-{str(uuid.uuid4())}'
 
     def create(self, req_body, kwargs):
         try:
             blog_dict = {
-                "blog_id": str(uuid.uuid4()),
+                "blog_id": self.generate_blog_id(req_body["name"]),
                 "name": req_body["name"],
                 "display_name": req_body["name"],
                 "description": self.create_description(req_body["content"]),
@@ -45,8 +53,7 @@ class Blogs(object):
             return dict(
                 status="success",
                 message="letter created successfully",
-                blog_id=blog_dict["blog_id"],
-                blog_name=blog_dict["name"])
+                blog_id=blog_dict["blog_id"])
         except Exception as e:
             logging.error(traceback.format_exc())
             return {
@@ -56,6 +63,12 @@ class Blogs(object):
 
     def list(self, args, kwargs):
         try:
+            count = get_count(Collections.BLOGS)
+            page = int(args.get("page", 1))
+            limit = int(args.get("limit", 10))
+            skip_val = 0
+            page_count = 1
+            skip_val, limit, page_count = pagination(limit, page, count, page_count, skip_val)
             aggregate_query = [
                 {
                     "$match": {
@@ -73,6 +86,17 @@ class Blogs(object):
                 },
                 {
                     "$unwind": "$updates"
+                },
+                {
+                    "$sort": {
+                        "created_at": -1
+                    }
+                },
+                {
+                    "$skip": skip_val
+                },
+                {
+                    "$limit": limit
                 },
                 {
                     "$project": {
@@ -110,14 +134,6 @@ class Blogs(object):
                     )
                 aggregate_query[0]["$match"].update(search_query)
             data = aggregate_collection(Collections.BLOGS, aggregate_query)
-            count = len(data)
-            page = int(args.get("page", 1))
-            limit = int(args.get("limit", 10))
-            skip_val = 0
-            page_count = 1
-            skip_val, limit, page_count = pagination(limit, page, count, page_count, skip_val)
-            data = data[skip_val:]
-            data = data[:limit]
             return {
                 "status": "success",
                 "data": data,
@@ -189,10 +205,16 @@ class Blogs(object):
                 })
             data["related_contents"] = related_contents
             data["updates"].pop("_id", "")
-            return data
+            return {
+                "status": "success",
+                "data": data
+            }
         except Exception as e:
             logging.error(traceback.format_exc())
-            raise Exception(e)
+            return {
+                "status": "error",
+                "message": str(e)
+            }
 
     def update(self, req_body, kwargs):
         try:
@@ -209,8 +231,19 @@ class Blogs(object):
                         "pays": 1
                     }
                 })
-            if type == "comment":
+            elif type == "comment":
                 update_documents(Collections.UPDATES, query, {
+                    "$push": {
+                        "comments": {
+                            "id": str(uuid.uuid4()),
+                            "user": kwargs.get("user_name", "guest"),
+                            "created_at": datetime.utcnow(),
+                            "data": req_body["comment"]
+                        }
+                    }
+                })
+            elif type == "comment_reply":
+                update_documents(Collections.COMMENT_UPDATES, query, {
                     "$push": {
                         "comments": {
                             "id": str(uuid.uuid4()),
