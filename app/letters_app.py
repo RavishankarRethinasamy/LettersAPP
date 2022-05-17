@@ -1,4 +1,5 @@
 import logging
+import requests
 import traceback
 
 from flask import Flask, request
@@ -9,6 +10,8 @@ from app.api.v1.blog.route import BlogsRoute
 from app.api.v1.blog.actions import Blogs
 
 from common.utils import parse_req
+from common.definitions import Collections
+from utils.db import insert_document
 
 app = Flask("letters")
 CORS(app)
@@ -45,6 +48,32 @@ def update_blogs():
 def create_blog():
     req_body = parse_req(request.get_data())
     return Blogs().create(req_body, kwargs={})
+
+
+@app.route("/v1/blog/recaptcha", methods=["POST"])
+def verify_recaptcha():
+    try:
+        req_body = parse_req(request.get_data())
+        verify_url = f"https://www.google.com/recaptcha/api/siteverify?" \
+                     f"secret={req_body['secret']}&response={req_body['response']}"
+        response = requests.post(verify_url)
+        if response.ok:
+            response = response.json()
+            if response["success"]:
+                insert_document(Collections.RECAPTCHA, response)
+                if response["score"] < 0.5:
+                    raise Exception("bot")
+            else:
+                raise Exception(" ".join(response["error-codes"]))
+        else:
+            raise Exception("Error occurred in recaptcha verification")
+        return {"status": "success"}
+    except Exception as e:
+        logging.error(traceback.format_exc())
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 
 # ******************************************** Authorized User APIs *************************************

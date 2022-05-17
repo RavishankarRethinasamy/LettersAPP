@@ -80,6 +80,8 @@ def remove_documents(collection_name, query):
     conn.remove(query)
 
 
-def get_count(collection_name):
+def get_count(collection_name, query=None):
     conn = connect(collection_name)
+    if query:
+        conn = conn.find(query)
     return conn.count()

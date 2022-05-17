@@ -3,6 +3,7 @@ class Collections(object):
     UPDATES = "updates"
     CATEGORY = "category"
     COMMENT_UPDATES = "comment_updates"
+    RECAPTCHA = "recaptcha"
 
 
 class HttpCodes(object):

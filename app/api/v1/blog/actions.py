@@ -4,7 +4,7 @@ import traceback
 from datetime import datetime
 from string import punctuation
 from utils.db import insert_document, update_documents, find_documents, \
-    aggregate_collection, remove_documents, get_count
+    aggregate_collection, remove_documents, get_count, find_document
 from common.definitions import Collections
 from common.utils import pagination
 
@@ -64,6 +64,11 @@ class Blogs(object):
     def list(self, args, kwargs):
         try:
             count = get_count(Collections.BLOGS)
+            if args.get("search"):
+                search_query = {
+                    "display_name": {"$regex": args["search"], "$options": "i"}
+                }
+                count = get_count(Collections.BLOGS, search_query)
             page = int(args.get("page", 1))
             limit = int(args.get("limit", 10))
             skip_val = 0
@@ -226,11 +231,36 @@ class Blogs(object):
                 "blog_id": blog_id
             }
             if type == "pay":
-                update_documents(Collections.UPDATES, query, {
-                    "$inc": {
-                        "pays": 1
-                    }
-                })
+                email = kwargs.get("email")
+                if req_body.get("comment_id"):
+                    query["comment_id"] = req_body["comment_id"]
+                    if find_document(Collections.COMMENT_UPDATES, {
+                        "comment_id": req_body["comment_id"],
+                        "payers": email
+                    }):
+                        raise Exception("Already paid")
+                    update_documents(Collections.COMMENT_UPDATES, query, {
+                        "$inc": {
+                            "pays": 1
+                        },
+                        "$push": {
+                            "payers": email
+                        }
+                    }, upsert=True)
+                else:
+                    if find_document(Collections.UPDATES, {
+                        "blog_id": blog_id,
+                        "payers": email
+                    }):
+                        raise Exception("Already paid")
+                    update_documents(Collections.UPDATES, query, {
+                        "$inc": {
+                            "pays": 1
+                        },
+                        "$push": {
+                            "payers": email
+                        }
+                    })
             elif type == "comment":
                 update_documents(Collections.UPDATES, query, {
                     "$push": {
@@ -243,6 +273,7 @@ class Blogs(object):
                     }
                 })
             elif type == "comment_reply":
+                query["comment_id"] = req_body["comment_id"]
                 update_documents(Collections.COMMENT_UPDATES, query, {
                     "$push": {
                         "comments": {
@@ -252,7 +283,7 @@ class Blogs(object):
                             "data": req_body["comment"]
                         }
                     }
-                })
+                }, upsert=True)
             return {
                 "status": "success",
                 "message": "letter updated successfully"
