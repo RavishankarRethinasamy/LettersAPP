@@ -3,6 +3,8 @@ import logging
 import traceback
 from datetime import datetime
 from string import punctuation
+from math import ceil
+
 from utils.db import insert_document, update_documents, find_documents, \
     aggregate_collection, remove_documents, get_count, find_document
 from common.definitions import Collections
@@ -18,9 +20,7 @@ class Blogs(object):
                 if content["insert"] == "\n":
                     continue
                 desc += content["insert"].replace("\n", " ")
-                if len(desc) > 302:
-                    break
-        return f'{desc}...' if len(desc) < 302 else f'{desc[0:301]}...'
+        return f'{desc}...' if len(desc) < 302 else f'{desc[0:301]}...', len(desc)
 
     def generate_blog_id(self, name):
         for sc in punctuation:
@@ -31,24 +31,30 @@ class Blogs(object):
 
     def create(self, req_body, kwargs):
         try:
+            description, content_length = self.create_description(req_body["content"])
             blog_dict = {
                 "blog_id": self.generate_blog_id(req_body["name"]),
                 "name": req_body["name"],
                 "display_name": req_body["name"],
-                "description": self.create_description(req_body["content"]),
+                "description": description,
                 "content": req_body["content"],
                 "created_by": kwargs.get("user_name", "guest"),
                 "created_at": datetime.utcnow(),
                 "is_deleted": False,
                 "is_public": req_body.get("is_public", True),
                 "type": req_body.get("type", "story"),
-                "category": req_body.get("category", [])
+                "category": req_body.get("category", []),
+                "metadata": {
+                    "ettr": "less than 1 min read" if content_length < 1000 else
+                    f"{ceil(content_length / 1000)} min read"
+                }
             }
             insert_document(Collections.BLOGS, blog_dict)
             insert_document(Collections.UPDATES, {
                 "blog_id": blog_dict["blog_id"],
                 "pays": 0,
-                "comments": []
+                "comments": [],
+                "views": 0
             })
             return dict(
                 status="success",
@@ -118,6 +124,7 @@ class Blogs(object):
                         "type": "$type",
                         "category": "$category",
                         "pays": "$updates.pays",
+                        "metadata": "$metadata",
                         "_id": 0
                     }
                 }
@@ -187,6 +194,7 @@ class Blogs(object):
                         "type": "$type",
                         "category": "$category",
                         "updates": "$updates",
+                        "metadata": "$metadata",
                         "_id": 0
                     }
                 }
@@ -210,6 +218,13 @@ class Blogs(object):
                 })
             data["related_contents"] = related_contents
             data["updates"].pop("_id", "")
+            update_documents(Collections.UPDATES, {
+                "blog_id": blog_id
+            }, {
+                                 "$inc": {
+                                     "views": 1
+                                 }
+                             })
             return {
                 "status": "success",
                 "data": data
