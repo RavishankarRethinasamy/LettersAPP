@@ -16,7 +16,8 @@ def run():
     try:
         port, host = (config.args.get("MAIN.port"), config.args.get("MAIN.host"))
         logging.info(f'Starting Letters App On {host}:{port}')
-        letters_app.app.run(host, port, threaded=True)
+        letters_app.app.run(host, port, threaded=True, ssl_context=(config.args.get("MAIN.ssl_cert"),
+                                                                    config.args.get("MAIN.ssl_cert_key")))
     except Exception as e:
         sys.stderr.write(f"ERROR :: {str(e)}")
         sys.exit(1)
